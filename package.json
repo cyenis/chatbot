@@ -16,5 +16,10 @@
   "bugs": {
     "url": "https://github.com/madStripes/chatbot/issues"
   },
-  "homepage": "https://github.com/madStripes/chatbot#readme"
+  "homepage": "https://github.com/madStripes/chatbot#readme",
+  "dependencies": {
+    "botbuilder": "^3.14.1",
+    "request": "^2.85.0",
+    "restify": "^4.3.2"
+  }
 }
