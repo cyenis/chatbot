@@ -1,4 +1,5 @@
 const builder = require('botbuilder');
+const api = require('../router');
 
 const categoryChoices = [ 'Sneakers', 'Clothes' ];
 
@@ -78,21 +79,46 @@ let sneakers = [
   (session, results, next) => {
     let sneakersName = results.response;
     session.privateConversationData.name = sneakersName;
-    // check stock
-
-    let response = defaultStock;
-    // response
-    response = response || [];
-    session.privateConversationData.stores = response;
     
-    // generate list of options
-    let choices = response.map((store) => {
-      // return new builder.Message(session)
-      return store.name;
-    })
+    let sizePromptMsg = session.gettext('size-prompt')
+    builder.Prompts.number(session, sizePromptMsg);
+  },
+  (session, results, next) => {
+    let size = results.response;
 
-    let storeChoicesPrompt = session.gettext('store-choices-prompt');
-    builder.Prompts.choice(session, storeChoicesPrompt, choices, {listStyle: builder.ListStyle.button});
+    session.privateConversationData.size = size;
+    let sneakersName = session.privateConversationData.name;
+    
+    // check stock
+    let sneakersNameEncoded = encodeURI(sneakersName);
+
+    api.checkStock(sneakersNameEncoded, size, (response) => {
+      response = response || [];
+
+      session.privateConversationData.stores = response;
+      
+      // generate list of options
+      let choices = response.map((store) => {
+        // return new builder.Message(session)
+        return store.name;
+      })
+
+      if(choices.length < 1) {
+        return session.endDialog('no-stock-anywhere');
+      }
+
+      
+      let image = new builder.CardImage().url(response[0].imageUrl);
+      let imageMsg = new builder.HeroCard()
+        .images([image])
+        .title(sneakersName);
+      session.send(imageMsg);
+
+      let storeChoicesPrompt = session.gettext('store-choices-prompt');
+      builder.Prompts.choice(session, storeChoicesPrompt, choices, {listStyle: builder.ListStyle.button});
+
+    })
+    
 
   },
   // TODO: size?
