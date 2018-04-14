@@ -100,7 +100,7 @@ let sneakers = [
       // generate list of options
       let choices = response.map((store) => {
         // return new builder.Message(session)
-        return store.name;
+        return store.store_name;
       })
 
       if(choices.length < 1) {
@@ -121,10 +121,9 @@ let sneakers = [
     
 
   },
-  // TODO: size?
   (session, results, next) => {
     let store = session.privateConversationData.stores[results.response.index];
-    session.privateConversationData.storeid = store.store_id;
+    session.privateConversationData.store = store;
 
     let timerangeChoicesPrompt = session.gettext('timerange-choices-prompt');
     builder.Prompts.choice(session, timerangeChoicesPrompt, store.timerange, {listStyle: builder.ListStyle.button});
@@ -135,7 +134,15 @@ let sneakers = [
     session.privateConversationData.timerange = timerange;
 
     // post appointment
-    session.endDialog('APPOINTMENT CREATED');
+
+    let {store_id, product_id} = session.privateConversationData.store;
+
+    api.arrangeAppointment(product_id, 5, store_id, (appointmentId) => {
+      session.privateConversationData.appointments = session.privateConversationData.appointments ? session.privateConversationData.appointments : [];
+      session.privateConversationData.appointments.push(appointmentId);
+      session.endDialog('APPOINTMENT CREATED');
+    })
+    
   }
 ];
 

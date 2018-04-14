@@ -20,21 +20,48 @@ function checkStock(productName, size, cb) {
     stores = stores.map((elem) => {
       return {
         store_id: elem.store.code,
-        name: elem.product.name,
+        product_id: elem.product.code,
+        product_name: elem.product.name,
+        store_name: elem.store.name,
         imageUrl: elem.product.url,
         stock: elem.quantity,
         timerange: ['19:30', '16:30', '15:30']
       }
     });
+    stores = stores.filter((store) => {
+      return store.stock ? true : false;
+    })
     cb(stores);
   });
 }
 
-// function arrangeAppointment() {
-  
-// }
+function arrangeAppointment(productId, hourOfDay, storeId, cb) {
+  let body = {
+    productId,
+    hourOfDay,
+    storeId,
+    dayOfWeek: 'MONDAY'
+  };
+
+  let url = `${baseUrl}/appointment`;
+
+  let params = {
+    url,
+    method: 'POST',
+    body,
+    json: true
+  }
+
+  request(params, (err, resp) => {
+    let appointmentId = (!err && resp && resp.body && resp.body.id)
+      ? resp.body.id : 0;
+
+    cb(appointmentId);
+  })
+}
 
 
 module.exports = {
-  checkStock
+  checkStock,
+  arrangeAppointment
 };
