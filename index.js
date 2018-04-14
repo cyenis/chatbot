@@ -16,7 +16,11 @@ let connector = new builder.ChatConnector({
     appId: process.env.APP_ID,
     appPassword: process.env.APP_PASSWORD
 });
-let bot = new builder.UniversalBot(connector);
+
+var inMemoryStorage = new builder.MemoryBotStorage();
+
+let bot = new builder.UniversalBot(connector)
+  .set('storage', inMemoryStorage); // Register in-memory storage
 server.post('/api/messages', connector.listen());
 
 // root dialog
