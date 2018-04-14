@@ -1,5 +1,6 @@
 const restify = require('restify');
 const builder = require('botbuilder');
+const dialogs = require('./dialogs');
 
 // Setup Restify Server
 let server = restify.createServer();
@@ -23,9 +24,16 @@ let bot = new builder.UniversalBot(connector)
   .set('storage', inMemoryStorage); // Register in-memory storage
 server.post('/api/messages', connector.listen());
 
+// load all dialogs
+
+let dialogNames = Object.keys(dialogs);
+for (dialogName of dialogNames) {
+  bot.dialog(dialogName, dialogs[dialogName]);
+}
+
 // root dialog
 bot.dialog('/', [
   (session, results, next) => {
-    session.send('hi');
+    session.beginDialog('welcome');
   }
 ])
