@@ -4,6 +4,8 @@ const api = require('../router');
 const categoryChoices = [ 'Sneakers', 'Clothes' ];
 const SECONDS_DELAY_MSG = 10;
 
+const APP_BASE_URL = process.env.APP_BASE_URL;
+
 const defaultStock = [
   {
     name: 'dummy name 1',
@@ -108,11 +110,13 @@ let sneakers = [
         return session.endDialog('no-stock-anywhere');
       }
       
-      let image = new builder.CardImage().url(response[0].imageUrl);
+      let image = new builder.CardImage().url(/*`${APP_BASE_URL}/${*/response[0].imageUrl/*}`*/);
       let imageMsg = new builder.HeroCard()
         .images([image])
         .title(sneakersName);
-      session.send(imageMsg);
+      let msg = new builder.Message()
+        .addAttachment(imageMsg);
+      session.send(msg);
 
       let storeChoicesPrompt = session.gettext('store-choices-prompt');
       builder.Prompts.choice(session, storeChoicesPrompt, choices, {listStyle: builder.ListStyle.button});
@@ -192,21 +196,21 @@ let clothes = [
         return session.endDialog('no-stock-anywhere');
       }
 
-      let image = new builder.CardImage().url(response[0].imageUrl);
+      let image = new builder.CardImage().url(/*`${APP_BASE_URL}/${*/response[0].imageUrl/*}`*/);
       let imageMsg = new builder.HeroCard()
         .images([image])
         .title(clothesName);
-      session.send(imageMsg);
+      let msg = new builder.Message()
+        .addAttachment(imageMsg);
+      session.send(msg);
 
       let listMsg = new builder.Message()
         .attachments(choices)
-        .attachmentLayout(builder.AttachmentLayout.carousel)
+        // .attachmentLayout(builder.AttachmentLayout.carousel)
       
       session.send(listMsg);
       session.endDialog();
     })
-    
-
   },
 ];
 
