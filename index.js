@@ -38,4 +38,4 @@ bot.dialog('/', [
   (session, results, next) => {
     session.beginDialog('welcome');
   }
-])
+]);

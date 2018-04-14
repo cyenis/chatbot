@@ -2,6 +2,7 @@ const builder = require('botbuilder');
 const api = require('../router');
 
 const categoryChoices = [ 'Sneakers', 'Clothes' ];
+const SECONDS_DELAY_MSG = 10;
 
 const defaultStock = [
   {
@@ -139,6 +140,11 @@ let sneakers = [
     api.arrangeAppointment(product_id, 5, store_id, (appointmentId) => {
       session.privateConversationData.appointments = session.privateConversationData.appointments ? session.privateConversationData.appointments : [];
       session.privateConversationData.appointments.push(appointmentId);
+
+      setTimeout(() => {
+        session.send('APPOINTMENT REMINDER');
+      }, 1000*SECONDS_DELAY_MSG);
+
       session.endDialog('APPOINTMENT CREATED');
     })
     
@@ -202,10 +208,36 @@ let clothes = [
     
 
   },
+];
+
+let articles = [
+  {
+    name: 'Adidas Superstar Red',
+    reason: 'TOGETHER',
+    price: 40,
+    imageUrl: '',
+  },
+  {
+    name: 'Adidas Superstar Blue',
+    reason: 'TOGETHER',
+    price: 40,
+    imageUrl: '',
+  }
+];
+
+function getArticlesMessages() {
+ return [];
+}
+
+let recomendations = [
+  (session, results, next) => {
+
+  }
 ]
 
 module.exports = {
   welcome,
   sneakers,
-  clothes
+  clothes,
+  recomendations
 };
