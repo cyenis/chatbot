@@ -100,13 +100,12 @@ let sneakers = [
       // generate list of options
       let choices = response.map((store) => {
         // return new builder.Message(session)
-        return store.store_name;
+        return `${store.store_name}, ${store.store_location}`;
       })
 
       if(choices.length < 1) {
         return session.endDialog('no-stock-anywhere');
       }
-
       
       let image = new builder.CardImage().url(response[0].imageUrl);
       let imageMsg = new builder.HeroCard()
@@ -155,27 +154,52 @@ let clothes = [
   (session, results, next) => {
     let clotheName = results.response;
     session.privateConversationData.name = clotheName;
-    // check stock
-
-    let response = defaultStock;
-    // response
-    response = response || [];
-    session.privateConversationData.stores = response;
     
-    // generate list of options
-    let choices = response.map((store) => {
-      // return new builder.Message(session)
+    let sizePromptMsg = session.gettext('size-prompt')
+    builder.Prompts.number(session, sizePromptMsg);
+  },
+  (session, results, next) => {
+    let size = results.response;
 
-      // let card = new builder.HeroCard
-      return store.name;
+    session.privateConversationData.size = size;
+    let clothesName = session.privateConversationData.name;
+    
+    // check stock
+    clothesNameEncoded = encodeURI(clothesName);
+
+    api.checkStock(clothesNameEncoded, size, (response) => {
+      response = response || [];
+
+      session.privateConversationData.stores = response;
+      
+      // generate list of options
+      let choices = response.map((store) => {
+        // return new builder.Message(session)
+        let hc = new builder.HeroCard()
+          .title(`${store.store_name}, ${store.store_location}`)
+          // .images([new builder.CardImage().url(store.imageUrl)])
+
+        return hc;
+      })
+
+      if(choices.length < 1) {
+        return session.endDialog('no-stock-anywhere');
+      }
+
+      let image = new builder.CardImage().url(response[0].imageUrl);
+      let imageMsg = new builder.HeroCard()
+        .images([image])
+        .title(clothesName);
+      session.send(imageMsg);
+
+      let listMsg = new builder.Message()
+        .attachments(choices)
+        .attachmentLayout(builder.AttachmentLayout.carousel)
+      
+      session.send(listMsg);
+      session.endDialog();
     })
-
-    let storeChoicesPrompt = session.gettext('store-choices-prompt');
-    // builder.Prompts.choice(session, storeChoicesPrompt, choices, {listStyle: builder.ListStyle.button});
-
-    session.send(choices.toString());
-
-    session.endDialog('NOTHING MORE TO DO');
+    
 
   },
 ]

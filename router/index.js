@@ -20,6 +20,7 @@ function checkStock(productName, size, cb) {
     stores = stores.map((elem) => {
       return {
         store_id: elem.store.code,
+        store_location: elem.store.location,
         product_id: elem.product.code,
         product_name: elem.product.name,
         store_name: elem.store.name,
