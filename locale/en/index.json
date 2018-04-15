@@ -8,5 +8,6 @@
   "store-selected": "Great! Now let's choose a time for you to came in. We'll have your shoes ready for you.",
   "timerange-choices-prompt": "Here are the time-slots best suitable for you.",
   "appointment-created-success": "Appointment created!\nWe'll see you at %s!",
-  "no-stock-anywhere": "There is no stock anywhere :("
+  "no-stock-anywhere": "There is no stock anywhere :(",
+  "prompt-attachment": "Send me a picture!"
 }

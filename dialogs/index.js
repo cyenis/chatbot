@@ -1,5 +1,6 @@
 const builder = require('botbuilder');
 const api = require('../router');
+const vision = require('../router/vision');
 
 const categoryChoices = [ 'Sneakers', 'Clothes', 'ImageScanner' ];
 const SECONDS_DELAY_MSG = 10;
@@ -275,8 +276,12 @@ let imagescanner = [
     console.log(results);
     let url = (results.response && (results.response.length > 0) && results.response[0].contentUrl)
       ? results.response[0].contentUrl : '';
-    api.recognizeSneaker(url, (name) => {
-      session.send('wearing ' + name);
+
+    let stream = vision.getImageStreamFromMessage(session.message);
+    api.recognizeSneakerStream(stream, (name) => {
+      console.log('NAME');
+      console.log(name);
+      session.send('GREAT ' + name + '!');
     })
   }
 ]

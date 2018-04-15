@@ -1,6 +1,7 @@
 const request = require('request');
 
 const baseUrl = 'http://8fa24ba1.ngrok.io/adidas';
+const vision = require('./vision');
 
 function checkStock(productName, size, cb) {
   let url = `${baseUrl}/stock`;
@@ -89,8 +90,31 @@ function recognizeSneaker(imageUrl, cb) {
   })
 }
 
+function recognizeSneakerStream(stream, cb) {
+  var requestData = {
+    url: 'https://southcentralus.api.cognitive.microsoft.com/customvision/v1.1/Prediction/d89ea88a-b51b-4b2d-af9a-2bbc2117c143/image?iterationId=202628a5-25b4-400f-8086-b93c94ac50bf',
+    encoding: 'binary',
+    json: true,
+    headers: {
+      'Prediction-Key': '464da760367341d4bcde3d1e9e33dff2',
+      'content-type': 'application/octet-stream'
+    }
+  };
+
+  stream.pipe(request.post(requestData, function (error, response, body) {
+    if (error) {
+        cb('');
+    } else if (response.statusCode !== 200) {
+        cb('');
+    } else {
+        cb(vision.extractCaption(body));
+    }
+  }));
+}
+
 module.exports = {
   checkStock,
   arrangeAppointment,
-  recognizeSneaker
+  recognizeSneaker,
+  recognizeSneakerStream
 };
