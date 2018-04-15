@@ -50,6 +50,21 @@ function createButtonsMessage(session, text, choices) {
 	// builder.Prompts.text(session, msg, args);
 }
 
+function createCardWithButtons(session, text, buttonsValue, buttonsText, ) {
+  let buttons = []
+  for(let i = 0; i < buttonsText.length; i++) {
+    buttons.push(builder.CardAction.imBack(session, buttonsValue[i], buttonsText[i]));
+  }
+    
+  let card = new builder.HeroCard(session)
+    .text(text)
+    .buttons(buttons);
+
+  let msg = new builder.Message(session)
+    .attachments([card]);
+  return msg;
+}
+
 let welcome = [
   (session, results, next) => {
     // send welcome to the user
@@ -58,24 +73,19 @@ let welcome = [
     // choose sneakers || clothes
     let prompt = session.gettext('choose-category-prompt');
     let choices = categoryChoices;
-    builder.Prompts.choice(session, prompt, choices, {listStyle: builder.ListStyle.button});
+    let choicesValue = choices.map((choice) => {
+      return choice.toLowerCase();
+    })
+
+    let promptMsg = createCardWithButtons(session, prompt, choicesValue, choices)
+    
+    builder.Prompts.text(session, promptMsg);
 
   },
   // parse productName
   (session, results, next) => {
-    console.log(results);
-    let optionChoosed = results.response.index;
-
-    let nextDialog;
-    switch(optionChoosed) {
-      case 1:
-        nextDialog = 'clothes';
-        break;
-      case 0:
-      default:
-        nextDialog = 'sneakers';
-        break
-    }
+    let nextDialog = results.response;
+    
     session.beginDialog(nextDialog);
   },
   (session, results, next) => {
@@ -118,13 +128,22 @@ let sneakers = [
     api.checkStock(sneakersNameEncoded, size, (response) => {
       response = response || [];
 
-      session.privateConversationData.stores = response;
+      let stores = {};
+      for(store of response) {
+        stores[store.store_name] = store;
+      }
+
+      session.privateConversationData.stores = stores;
       
       // generate list of options
       let choices = response.map((store) => {
         // return new builder.Message(session)
         return `${store.store_name}, ${store.store_location}`;
       })
+      let choicesValue = response.map((store) => {
+        // return new builder.Message(session)
+        return store.store_name;
+      });
 
       if(choices.length < 1) {
         return session.endDialog('no-stock-anywhere');
@@ -139,20 +158,25 @@ let sneakers = [
       session.send(msg);
 
       let storeChoicesPrompt = session.gettext('store-choices-prompt');
-      builder.Prompts.choice(session, storeChoicesPrompt, choices, {listStyle: builder.ListStyle.button});
+      let choiceMsg = createCardWithButtons(session, storeChoicesPrompt, choicesValue, choices);
+
+      // builder.Prompts.choice(session, choiceMsg, choices);
+      builder.Prompts.text(session, choiceMsg);
 
     })
   },
   (session, results, next) => {
-    let store = session.privateConversationData.stores[results.response.index];
+    let store = session.privateConversationData.stores[results.response];
     session.privateConversationData.store = store;
     
     session.send('store-selected');
     let timerangeChoicesPrompt = session.gettext('timerange-choices-prompt');
-    builder.Prompts.choice(session, timerangeChoicesPrompt, store.timerange, {listStyle: builder.ListStyle.button});
+
+    let promptMsg = createCardWithButtons(session, timerangeChoicesPrompt, store.timerange, store.timerange);
+    builder.Prompts.text(session, promptMsg);
   },
   (session, results, next) => {
-    let timerange = session.privateConversationData.store.timerange[results.response.index];
+    let timerange = results.response;
 
     session.privateConversationData.timerange = timerange;
 
