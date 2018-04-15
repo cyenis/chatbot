@@ -107,14 +107,14 @@ let welcome = [
 
 let sneakers = [
   (session, results, next) => {
-    if(session.privateConversationData.name) return next();
+    if(session.userData.name) return next();
     let promptName = session.gettext('sneakers-prompt-name');
     builder.Prompts.text(session, promptName);
   },
   (session, results, next) => {
-    if(!session.privateConversationData.name) {
+    if(!session.userData.name) {
       let sneakersName = results.response;
-      session.privateConversationData.name = sneakersName;
+      session.userData.name = sneakersName;
     }
     
     let sizePromptMsg = session.gettext('size-prompt')
@@ -123,21 +123,22 @@ let sneakers = [
   (session, results, next) => {
     let size = results.response;
 
-    session.privateConversationData.size = size;
-    let sneakersName = session.privateConversationData.name;
+    session.userData.size = size;
+    let sneakersName = session.userData.name;
     
     // check stock
     let sneakersNameEncoded = encodeURI(sneakersName);
 
     api.checkStock(sneakersNameEncoded, size, (response) => {
       response = response || [];
+      if(response.length > 3) response = response.slice(0, 3);
 
       let stores = {};
       for(store of response) {
         stores[store.store_name] = store;
       }
 
-      session.privateConversationData.stores = stores;
+      session.userData.stores = stores;
       
       // generate list of options
       let choices = response.map((store) => {
@@ -170,8 +171,8 @@ let sneakers = [
     })
   },
   (session, results, next) => {
-    let store = session.privateConversationData.stores[results.response];
-    session.privateConversationData.store = store;
+    let store = session.userData.stores[results.response];
+    session.userData.store = store;
     
     session.send('store-selected');
     let timerangeChoicesPrompt = session.gettext('timerange-choices-prompt');
@@ -182,22 +183,23 @@ let sneakers = [
   (session, results, next) => {
     let timerange = results.response;
 
-    session.privateConversationData.timerange = timerange;
+    session.userData.timerange = timerange;
 
     // post appointment
 
-    let {store_id, product_id} = session.privateConversationData.store;
+    let {store_id, product_id} = session.userData.store;
 
     api.arrangeAppointment(product_id, 5, store_id, (appointmentId) => {
-      session.privateConversationData.appointments = session.privateConversationData.appointments ? session.privateConversationData.appointments : [];
-      session.privateConversationData.appointments.push(appointmentId);
+      session.userData.appointments = session.userData.appointments ? session.userData.appointments : [];
+      session.userData.appointments.push(appointmentId);
 
-      setTimeout(() => {
-        // TODO: card apointment reminder
-        session.send('APPOINTMENT REMINDER');
-      }, 1000*SECONDS_DELAY_MSG);
+      // setTimeout(() => {
+      //   // TODO: card apointment reminder
+      //   session.send('APPOINTMENT REMINDER');
+      // }, 1000*SECONDS_DELAY_MSG);
 
       let successMsg = session.gettext('appointment-created-success', timerange);
+      session.userData = {};
       session.endDialog(successMsg);
     })
     
@@ -212,7 +214,7 @@ let clothes = [
   },
   (session, results, next) => {
     let clotheName = results.response;
-    session.privateConversationData.name = clotheName;
+    session.userData.name = clotheName;
     
     let sizePromptMsg = session.gettext('size-prompt')
     builder.Prompts.text(session, sizePromptMsg);
@@ -220,8 +222,8 @@ let clothes = [
   (session, results, next) => {
     let size = results.response;
 
-    session.privateConversationData.size = size;
-    let clothesName = session.privateConversationData.name;
+    session.userData.size = size;
+    let clothesName = session.userData.name;
     
     // check stock
     clothesNameEncoded = encodeURI(clothesName);
@@ -229,7 +231,7 @@ let clothes = [
     api.checkStock(clothesNameEncoded, size, (response) => {
       response = response || [];
 
-      session.privateConversationData.stores = response;
+      session.userData.stores = response;
       
       // generate list of options
       let choices = response.map((store) => {
@@ -258,6 +260,7 @@ let clothes = [
         // .attachmentLayout(builder.AttachmentLayout.carousel)
       
       session.send(listMsg);
+      session.userData = {};
       session.endDialog();
     })
   },
@@ -285,7 +288,7 @@ let imagescanner = [
       console.log('NAME');
       console.log(name);
       session.send('GREAT ' + name + '!');
-      session.privateConversationData.name = name.split('-')[0].toLowerCase();
+      session.userData.name = name.split('-')[0].toLowerCase();
       next();
     })
   },
@@ -297,7 +300,10 @@ let imagescanner = [
     let answer = results.response;
     if(answer) {
       session.beginDialog('sneakers');
-    } else session.endDialog();
+    } else {
+      session.userData = {};
+      session.endDialog();
+    }
   }
 ]
 
