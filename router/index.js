@@ -1,6 +1,6 @@
 const request = require('request');
 
-const baseUrl = 'http://8fa24ba1.ngrok.io/adidas';
+const baseUrl = 'http://35.204.22.87/adidas';
 const vision = require('./vision');
 
 function checkStock(productName, size, cb) {

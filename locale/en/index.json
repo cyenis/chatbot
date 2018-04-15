@@ -9,5 +9,7 @@
   "timerange-choices-prompt": "Here are the time-slots best suitable for you.",
   "appointment-created-success": "Appointment created!\nWe'll see you at %s!",
   "no-stock-anywhere": "There is no stock anywhere :(",
-  "prompt-attachment": "Send me a picture!"
+  "prompt-attachment": "Send me a picture!",
+  "check-stock-sneaker-prompt": "Do you want to check the availability of that sneaker?",
+  "choose-options": "Do you want to do something more?"
 }

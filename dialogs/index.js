@@ -107,12 +107,15 @@ let welcome = [
 
 let sneakers = [
   (session, results, next) => {
+    if(session.privateConversationData.name) return next();
     let promptName = session.gettext('sneakers-prompt-name');
     builder.Prompts.text(session, promptName);
   },
   (session, results, next) => {
-    let sneakersName = results.response;
-    session.privateConversationData.name = sneakersName;
+    if(!session.privateConversationData.name) {
+      let sneakersName = results.response;
+      session.privateConversationData.name = sneakersName;
+    }
     
     let sizePromptMsg = session.gettext('size-prompt')
     builder.Prompts.number(session, sizePromptMsg);
@@ -282,7 +285,19 @@ let imagescanner = [
       console.log('NAME');
       console.log(name);
       session.send('GREAT ' + name + '!');
+      session.privateConversationData.name = name.split('-')[0].toLowerCase();
+      next();
     })
+  },
+  (session, results, next) => {
+    let msg = session.gettext('check-stock-sneaker-prompt');
+    builder.Prompts.confirm(session, msg);
+  },
+  (session, results, next) => {
+    let answer = results.response;
+    if(answer) {
+      session.beginDialog('sneakers');
+    } else session.endDialog();
   }
 ]
 
