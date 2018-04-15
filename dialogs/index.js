@@ -53,8 +53,7 @@ function createButtonsMessage(session, text, choices) {
 let welcome = [
   (session, results, next) => {
     // send welcome to the user
-    session.send('welcome-1');
-    session.send('welcome-2');
+    session.send('welcome');
     
     // choose sneakers || clothes
     let prompt = session.gettext('choose-category-prompt');
@@ -97,7 +96,6 @@ let welcome = [
 
 let sneakers = [
   (session, results, next) => {
-    session.send('sneakers-welcome');
     let promptName = session.gettext('sneakers-prompt-name');
     builder.Prompts.text(session, promptName);
   },
@@ -144,18 +142,17 @@ let sneakers = [
       builder.Prompts.choice(session, storeChoicesPrompt, choices, {listStyle: builder.ListStyle.button});
 
     })
-    
-
   },
   (session, results, next) => {
     let store = session.privateConversationData.stores[results.response.index];
     session.privateConversationData.store = store;
-
+    
+    session.send('store-selected');
     let timerangeChoicesPrompt = session.gettext('timerange-choices-prompt');
     builder.Prompts.choice(session, timerangeChoicesPrompt, store.timerange, {listStyle: builder.ListStyle.button});
   },
   (session, results, next) => {
-    let timerange = results.response.index;
+    let timerange = session.privateConversationData.store.timerange[results.response.index];
 
     session.privateConversationData.timerange = timerange;
 
@@ -168,10 +165,12 @@ let sneakers = [
       session.privateConversationData.appointments.push(appointmentId);
 
       setTimeout(() => {
+        // TODO: card apointment reminder
         session.send('APPOINTMENT REMINDER');
       }, 1000*SECONDS_DELAY_MSG);
 
-      session.endDialog('APPOINTMENT CREATED');
+      let successMsg = session.gettext('appointment-created-success', timerange);
+      session.endDialog(successMsg);
     })
     
   }
