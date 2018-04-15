@@ -50,7 +50,7 @@ function createButtonsMessage(session, text, choices) {
 	// builder.Prompts.text(session, msg, args);
 }
 
-function createCardWithButtons(session, text, buttonsValue, buttonsText, ) {
+function createCardWithButtons(session, text, buttonsValue, buttonsText) {
   let buttons = []
   for(let i = 0; i < buttonsText.length; i++) {
     buttons.push(builder.CardAction.imBack(session, buttonsValue[i], buttonsText[i]));

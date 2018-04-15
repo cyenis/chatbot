@@ -61,6 +61,9 @@ function arrangeAppointment(productId, hourOfDay, storeId, cb) {
   })
 }
 
+// function recognizeSneaker() {
+
+// }
 
 module.exports = {
   checkStock,
