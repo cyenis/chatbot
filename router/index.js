@@ -1,6 +1,6 @@
 const request = require('request');
 
-const baseUrl = 'https://f4a7a8aa.ngrok.io/adidas';
+const baseUrl = 'http://8fa24ba1.ngrok.io/adidas';
 
 function checkStock(productName, size, cb) {
   let url = `${baseUrl}/stock`;

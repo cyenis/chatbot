@@ -30,6 +30,8 @@ let bot = new builder.UniversalBot(connector)
   .set('storage', inMemoryStorage); // Register in-memory storage
 server.post('/api/messages', connector.listen());
 
+bot.localePath(__dirname + "/locale");
+
 // load all dialogs
 
 let dialogNames = Object.keys(dialogs);

@@ -39,10 +39,22 @@ const defaultStock = [
   }
 ];
 
+
+function createButtonsMessage(session, text, choices) {
+  let buttons = choices.map((choice) => {
+    return builder.CardAction.imBack(session, choice, choice);
+  });
+	return new builder.Message(session)
+		.text(text)
+		.attachments([new builder.Keyboard(session).buttons(buttons)]);
+	// builder.Prompts.text(session, msg, args);
+}
+
 let welcome = [
   (session, results, next) => {
     // send welcome to the user
-    session.send('welcome');
+    session.send('welcome-1');
+    session.send('welcome-2');
     
     // choose sneakers || clothes
     let prompt = session.gettext('choose-category-prompt');
@@ -68,7 +80,17 @@ let welcome = [
     session.beginDialog(nextDialog);
   },
   (session, results, next) => {
-    session.send('back on welcome');
+    // more options
+    let options = [
+      'News',
+      'Recommedations',
+      // more things
+      'Check stock',
+      'Create appointment'
+    ];
+    // session.send('back on welcome');
+    let text = session.gettext('choose-options');
+    session.send(createButtonsMessage(session, text, options));
     console.log(results);
   }
 ]
@@ -166,7 +188,7 @@ let clothes = [
     session.privateConversationData.name = clotheName;
     
     let sizePromptMsg = session.gettext('size-prompt')
-    builder.Prompts.number(session, sizePromptMsg);
+    builder.Prompts.text(session, sizePromptMsg);
   },
   (session, results, next) => {
     let size = results.response;
@@ -214,24 +236,6 @@ let clothes = [
   },
 ];
 
-let articles = [
-  {
-    name: 'Adidas Superstar Red',
-    reason: 'TOGETHER',
-    price: 40,
-    imageUrl: '',
-  },
-  {
-    name: 'Adidas Superstar Blue',
-    reason: 'TOGETHER',
-    price: 40,
-    imageUrl: '',
-  }
-];
-
-function getArticlesMessages() {
- return [];
-}
 
 let recomendations = [
   (session, results, next) => {
